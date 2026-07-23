@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Ten 18+ - Cartes de Thèmes</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+        
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px 20px;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .theme-header {
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            padding: 12px 24px;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+        }
+
+        .question-card {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 900px;
+            padding: 20px;
+        }
+
+        .question-text {
+            font-size: clamp(2rem, 5vw, 3.8rem);
+            font-weight: 700;
+            line-height: 1.35;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            word-wrap: break-word;
+        }
+
+        .footer-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .counter {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 6px 16px;
+            border-radius: 20px;
+        }
+
+        .nav-hint {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2.5rem;
+            opacity: 0.3;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .nav-hint.left { left: 20px; }
+        .nav-hint.right { right: 20px; }
+
+        /* Click zones overlay */
+        .click-zone {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        .click-zone.left-zone { left: 0; }
+        .click-zone.right-zone { right: 0; }
+
+        /* Shuffling animation */
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="click-zone left-zone" id="leftZone" title="Question précédente"></div>
+    <div class="click-zone right-zone" id="rightZone" title="Question suivante"></div>
+
+    <div class="container">
+        <div class="theme-header" id="theme">Thème</div>
+        <div class="nav-hint left">❮</div>
+        <div class="nav-hint right">❯</div>
+        
+        <div class="question-card">
+            <div class="question-text" id="question">Chargement...</div>
+        </div>
+
+        <div class="footer-info">
+            <div class="counter" id="counter">1 / 100</div>
+        </div>
+    </div>
+
+    <script>
+        const rawData = [
+            {"theme": "Sexe", "question": "Propose un nom pour un sex-toy du futur (du plus inutile au plus indispensable)."},
+            {"theme": "Sexe", "question": "Décris une position sexuelle improbable (de la plus ridicule à la plus incroyable)."},
+            {"theme": "Sexe", "question": "Propose un mot de code pour parler de sexe en public (du plus ridicule au plus crédible)."},
+            {"theme": "Sexe", "question": "Imagine la réaction de ton/ta partenaire en te voyant nu(e) pour la première fois (du plus déçu au plus émerveillé)."},
+            {"theme": "Sexe", "question": "Un endroit saugrenu pour faire l'amour (du plus inconfortable au plus excitant)."},
+            {"theme": "Sexe", "question": "Un son ou gémissement pendant l'acte (du plus bizarre au plus sexy)."},
+            {"theme": "Sexe", "question": "Une excuse pour ne pas faire l'amour ce soir (de la plus bidon à la plus convaincante)."},
+            {"theme": "Sexe", "question": "Une phrase à ne surtout pas dire au lit (de la plus drôle à la plus tue-l'amour)."},
+            {"theme": "Sexe", "question": "Une lubie ou fétichisme insolite (du plus absurde au plus érotique)."},
+            {"theme": "Sexe", "question": "Un vêtement ou sous-vêtement sexy (du plus ridicule au plus irrésistible)."},
+            {"theme": "Sexe", "question": "Quelque chose à faire juste après l'amour (du plus déplacé au plus romantique)."},
+            {"theme": "Sexe", "question": "Une mauvaise surprise au moment de se déshabiller (de la plus gênante à la plus surprenante)."},
+            {"theme": "Sexe", "question": "Un endroit du corps original à embrasser (du plus bizarre au plus sensuel)."},
+            {"theme": "Sexe", "question": "Un rôle à jouer lors d'un jeu de rôle érotique (du plus ridicule au plus excitant)."},
+            {"theme": "Sexe", "question": "Une musique d'ambiance pour une nuit enflammée (de la plus catastrophique à la plus envoûtante)."},
+            {"theme": "Gêne & Tabous", "question": "Un secret honteux dévoilé au mauvais moment (du plus anodin au plus scandalisant)."},
+            {"theme": "Gêne & Tabous", "question": "Raconte la pire façon de rompre par SMS (de la plus lâche à la plus violente)."},
+            {"theme": "Gêne & Tabous", "question": "Une phrase pour rattraper le coup après avoir pété en public (de la plus ridicule à la plus classe)."},
+            {"theme": "Gêne & Tabous", "question": "Une habitude dégoûtante sous la douche (de la plus soft à la plus immonde)."},
+            {"theme": "Gêne & Tabous", "question": "Une gaffe monumentale à un mariage (de la plus petite bourde au chaos total)."},
+            {"theme": "Gêne & Tabous", "question": "Un message envoyé par erreur au mauvais destinataire (du plus drôle au plus compromettant)."},
+            {"theme": "Gêne & Tabous", "question": "Une excuse pour éviter de saluer quelqu'un dans la rue (de la plus basique à la plus tirée par les cheveux)."},
+            {"theme": "Gêne & Tabous", "question": "Une remarque déplacée lors d'un repas de famille (de la plus légère à la plus choquante)."},
+            {"theme": "Gêne & Tabous", "question": "Ce que tu fais quand personne ne te regarde (du plus banal au plus bizarre)."},
+            {"theme": "Gêne & Tabous", "question": "Une chose honteuse retrouvée dans ton sac ou tes poches (de la plus ordinaire à la plus inexplicable)."},
+            {"theme": "Gêne & Tabous", "question": "Une gaffe lors d'un premier rendez-vous (de la plus mignonne à la plus rédhibitoire)."},
+            {"theme": "Gêne & Tabous", "question": "Une chose bizarre sur laquelle tu as déjà été surpris(e) en train de fantasmer (de la moins grave à la plus étrange)."},
+            {"theme": "Gêne & Tabous", "question": "Une technique pour sortir d'une conversation ennuyeuse (de la plus polie à la plus sauvage)."},
+            {"theme": "Gêne & Tabous", "question": "Un endroit gênant où s'endormir (du plus classique au plus embarrassant)."},
+            {"theme": "Gêne & Tabous", "question": "Un bruit corporel incontrôlé au pire moment (du plus discret au plus dévastateur)."},
+            {"theme": "Soirées & Alcool", "question": "Une excuse pour quitter une soirée nulle à 22h (de la plus banale à la plus spectaculaire)."},
+            {"theme": "Soirées & Alcool", "question": "Un cocktail maison avec ce qui reste dans le frigo (du plus buvable au plus toxique)."},
+            {"theme": "Soirées & Alcool", "question": "Un défi stupide à réaliser en soirée après 3 verres (du plus gentillet au plus dangereux)."},
+            {"theme": "Soirées & Alcool", "question": "La pire chose à dire à un policier lors d'un contrôle d'alcoolémie (de la plus naïve à la plus provocante)."},
+            {"theme": "Soirées & Alcool", "question": "Un réveil de lendemain de soirée difficile (du plus normal au plus catastrophique)."},
+            {"theme": "Soirées & Alcool", "question": "Un objet étrange retrouvé dans son lit le lendemain de soirée (du plus courant au plus inexplicable)."},
+            {"theme": "Soirées & Alcool", "question": "Une phrase d'accroche lourde en boîte de nuit (de la plus ringarde à la plus pitoyable)."},
+            {"theme": "Soirées & Alcool", "question": "Une danse improvisée sur la piste (de la plus sobre à la plus incontrôlable)."},
+            {"theme": "Soirées & Alcool", "question": "Un SMS envoyé à son ex à 3h du matin (du plus mignon au plus lamentable)."},
+            {"theme": "Soirées & Alcool", "question": "Un endroit insolite où finir sa nuit (du plus confortable au plus misérable)."},
+            {"theme": "Soirées & Alcool", "question": "Une résolution prise en étant bourré(e) (de la plus réaliste à la plus absurde)."},
+            {"theme": "Soirées & Alcool", "question": "La pire chanson à passer pour chauffer une piste de danse (de la plus molle à la plus hors-sujet)."},
+            {"theme": "Soirées & Alcool", "question": "Une tenue improbable pour une soirée déguisée (de la plus paresseuse à la plus déplacée)."},
+            {"theme": "Soirées & Alcool", "question": "Une réaction face à quelqu'un qui vomit à côté de toi (de la plus compatissante à la plus dégoûtée)."},
+            {"theme": "Soirées & Alcool", "question": "Une cachette pour son alcool secret (de la plus évidente à la plus introuvable)."},
+            {"theme": "Dating & Séduction", "question": "Une phrase de drague improbable sur Tinder (de la plus mignonne à la plus malaisante)."},
+            {"theme": "Dating & Séduction", "question": "Un cadeau à offrir au premier rendez-vous (du plus classique au plus flippant)."},
+            {"theme": "Dating & Séduction", "question": "Une tenue pour un premier rendez-vous galant (de la plus passe-partout à la plus excentrique)."},
+            {"theme": "Dating & Séduction", "question": "Un mensonge pour paraître plus intéressant(e) sur son profil (du plus petit au plus énorme)."},
+            {"theme": "Dating & Séduction", "question": "La pire activité pour un premier rendez-vous (de la plus ennuyeuse à la plus cauchemardesque)."},
+            {"theme": "Dating & Séduction", "question": "Un critère éliminatoire immédiat chez un(e) prétendant(e) (du plus superficiel au plus grave)."},
+            {"theme": "Dating & Séduction", "question": "Une façon originale de demander le numéro de quelqu'un (de la plus classique à la plus audacieuse)."},
+            {"theme": "Dating & Séduction", "question": "Un sujet de conversation à bannir lors du premier date (du plus barbant au plus polémique)."},
+            {"theme": "Dating & Séduction", "question": "Une tactique pour faire monter la tension sexuelle (de la plus subtile à la plus directe)."},
+            {"theme": "Dating & Séduction", "question": "Un surnom ridicule donné à son/sa partenaire (du plus mignon au plus ridicule)."},
+            {"theme": "Dating & Séduction", "question": "Une réaction si ton date ne ressemble pas du tout à ses photos (de la plus polie à la plus fuite)."},
+            {"theme": "Dating & Séduction", "question": "Un endroit romantique pour un baiser (du plus cliché au plus insolite)."},
+            {"theme": "Dating & Séduction", "question": "Une mauvaise habitude chez un partenaire au début d'une relation (de la plus agaçante à la plus insupportable)."},
+            {"theme": "Dating & Séduction", "question": "Une excuse pour ne pas rappeler quelqu'un (de la plus honnête à la plus cruellement inventée)."},
+            {"theme": "Dating & Séduction", "question": "Un compliment très mal formulé (du plus maladroit au plus vexant)."},
+            {"theme": "Humour Noir & Absurde", "question": "Une raison absurde d'aller en enfer (de la plus petite faute au pire péché)."},
+            {"theme": "Humour Noir & Absurde", "question": "Un super-pouvoir complètement inutile mais orienté adulte (du plus insignifiant au plus ridicule)."},
+            {"theme": "Humour Noir & Absurde", "question": "La pire chose à dire lors d'un enterrement (de la plus maladroite à la plus scandaleuse)."},
+            {"theme": "Humour Noir & Absurde", "question": "Un message inscrit sur une tombe (du plus poétique au plus irrévérencieux)."},
+            {"theme": "Humour Noir & Absurde", "question": "Une façon originale de se débarrasser d'un corps (de la plus artisanale à la plus professionnelle)."},
+            {"theme": "Humour Noir & Absurde", "question": "Un job d'été de l'enfer (du plus pénible au plus traumatisant)."},
+            {"theme": "Humour Noir & Absurde", "question": "Un objet du quotidien utilisé comme arme de défense (du plus inoffensif au plus mortel)."},
+            {"theme": "Humour Noir & Absurde", "question": "Une dernière volonté ridicule avant d'être exécuté (de la plus simple à la plus saugrenue)."},
+            {"theme": "Humour Noir & Absurde", "question": "Un nom de groupe de rock trash (du plus poétique au plus vulgaire)."},
+            {"theme": "Humour Noir & Absurde", "question": "Ce qu'il ne faut pas dire à un médecin avant une opération (du plus stressant au plus stupide)."},
+            {"theme": "Humour Noir & Absurde", "question": "Une raison bête de déclencher une bagarre générale (de la plus futile à la plus absurde)."},
+            {"theme": "Humour Noir & Absurde", "question": "Un relooking de l'extrême loupé (du plus discret au plus monstrueux)."},
+            {"theme": "Humour Noir & Absurde", "question": "Une punition cruelle mais originale (de la plus douce à la plus diabolique)."},
+            {"theme": "Humour Noir & Absurde", "question": "Une prédiction de voyante catastrophique (de la plus vague à la plus effrayante)."},
+            {"theme": "Humour Noir & Absurde", "question": "Un plat servi dans un restaurant étoilé qui a l'air suspect (du plus médiocre au plus répugnant)."},
+            {"theme": "Fantasmagorie & Rêves", "question": "Un rêve bizarre récurrent (du plus perturbant au plus absurde)."},
+            {"theme": "Fantasmagorie & Rêves", "question": "Une célébrité avec qui passer une nuit sans lendemain (de la plus évidente à la plus inattendue)."},
+            {"theme": "Fantasmagorie & Rêves", "question": "Un lieu public pour une folie passagère (du plus discret au plus exposé)."},
+            {"theme": "Fantasmagorie & Rêves", "question": "Une créature mythologique qui te séduit (de la plus élégante à la plus monstrueuse)."},
+            {"theme": "Fantasmagorie & Rêves", "question": "Un pouvoir magique utilisé uniquement pour des fins coquines (du plus gentillet au plus vicieux)."},
+            {"theme": "Fantasmagorie & Rêves", "question": "Un scénario de film X auquel tu participerais (du plus romantique au plus délirant)."},
+            {"theme": "Fantasmagorie & Rêves", "question": "Un accessoire insolite à introduire dans le lit (du plus doux au plus extravagant)."},
+            {"theme": "Fantasmagorie & Rêves", "question": "Un endroit de la maison détourné de sa fonction (du plus classique au plus dangereux)."},
+            {"theme": "Fantasmagorie & Rêves", "question": "Un costume pour pimenter la soirée (du plus simple au plus élaboré)."},
+            {"theme": "Fantasmagorie & Rêves", "question": "Une expérience extrême à tester au moins une fois (de la plus douce à la plus folle)."},
+            {"theme": "Fantasmagorie & Rêves", "question": "Le fantasme le plus dur à avouer à son partenaire (du plus léger au plus osé)."},
+            {"theme": "Fantasmagorie & Rêves", "question": "Une situation de huis clos très hot (de la plus banale à la plus intense)."},
+            {"theme": "Fantasmagorie & Rêves", "question": "Un jouet d'enfance détourné pour adultes (du plus inoffensif au plus étrange)."},
+            {"theme": "Fantasmagorie & Rêves", "question": "Une île déserte avec une seule personne de ton choix (de la plus agréable à la plus compliquée)."},
+            {"theme": "Fantasmagorie & Rêves", "question": "Un massage qui dérape (du plus relaxant au plus torride)."},
+            {"theme": "Vie Quotidienne & Couple", "question": "Une dispute de couple pour une bêtise (de la plus mineure à la plus explosive)."},
+            {"theme": "Vie Quotidienne & Couple", "question": "Un compromis difficile à faire en ménage (du plus facile au plus insurmontable)."},
+            {"theme": "Vie Quotidienne & Couple", "question": "Une manie de ton/ta partenaire qui te rend fou/folle (de la plus agaçante à la plus insupportable)."},
+            {"theme": "Vie Quotidienne & Couple", "question": "Un petit mensonge quotidien dans le couple (du plus innocent au plus dangereux)."},
+            {"theme": "Vie Quotidienne & Couple", "question": "Une tentative de surprise romantique qui rate (de la plus mignonne à la pire catastrophe)."},
+            {"theme": "Vie Quotidienne & Couple", "question": "Une habitude sous la couette quand il fait froid (de la plus agréable à la plus égoïste)."},
+            {"theme": "Vie Quotidienne & Couple", "question": "Ce que tu fais quand ton/ta partenaire part en week-end (du plus productif au plus relâché)."},
+            {"theme": "Vie Quotidienne & Couple", "question": "Une façon de réclamer un câlin (de la plus subtile à la plus lourde)."},
+            {"theme": "Vie Quotidienne & Couple", "question": "Un surnom donné à la belle-mère (du plus respectueux au plus insultant)."},
+            {"theme": "Vie Quotidienne & Couple", "question": "Une vengeance mesquine après une scène de ménage (de la plus petite à la plus machiavélique)."},
+{"theme": "Sexe", "question": "Propose un nom pour un sex-toy du futur (du plus inutile au plus indispensable)."},
+{"theme": "Mimes", "question": "Mime un sex-toy du futur qui tombe en panne de batterie au pire moment (du plus discret au plus spectaculaire)."},
+{"theme": "Mimes", "question": "Mime un effeuillage ou strip-tease très maladroit (du plus ridicule au plus séduisant)."},
+{"theme": "Mimes", "question": "Mime une démonstration de pose de préservatif uniquement avec les pieds ou les coudes (de la plus brouillonne à la plus experte)."},
+{"theme": "Mimes", "question": "Mime une personne qui essaie de détacher un soutien-gorge rebelle dans le noir (du plus grand moment de solitude au geste parfait)."},
+{"theme": "Mimes", "question": "Mime quelqu'un qui se fait surprendre nu(e) dans le salon par ses beaux-parents (de la réaction la plus honteuse à la plus décontractée)."},
+{"theme": "Mimes", "question": "Mime un cours d'éducation sexuelle donné par une personne extrêmement mal à l'aise (du plus coincé au plus lunaire)."},
+{"theme": "Mimes", "question": "Mime quelqu'un qui essaie de marcher droit lors d'un contrôle d'alcoolémie après 5 verres (du plus grillé au plus convaincant)."},
+{"theme": "Mimes", "question": "Mime quelqu'un qui pète en public et tente discrètement de rejeter la faute sur le chien (du plus flagrant au plus subtil)."},
+{"theme": "Mimes", "question": "Mime une personne bloquée aux toilettes chez ses beaux-parents qui réalise qu'il n'y a plus de papier (de la panique sourde au drame absolu)."},
+{"theme": "Mimes", "question": "Mime l'envoi d'un SMS très hot au mauvais destinataire au moment où tu t'en rends compte (du simple choc à la crise d'hystérie)."},
+{"theme": "Mimes", "question": "Mime un premier rendez-vous où tu essaies de retirer un morceau de salade coincé entre tes dents (du plus dégoûtant au plus habile)."},
+{"theme": "Mimes", "question": "Mime quelqu'un qui essaie d'enlever un maillot de bain mouillé sous sa serviette sur la plage (du pire échec d'exhibition au geste de pro)."},
+{"theme": "Mimes", "question": "Mime une personne qui essaie de cacher un corps dans une valise trop petite (de la plus mauvaise organisation à la méthode de tueur en série)."},
+{"theme": "Mimes", "question": "Mime un chirurgien qui perd ses lunettes à l'intérieur d'un patient en pleine opération (de la petite bavure au chaos général)."},
+{"theme": "Mimes", "question": "Mime quelqu'un qui goûte un piment d'une force extrême et tente de garder sa dignité (du petit frisson à l'agonie totale)."},
+{"theme": "Mimes", "question": "Mime un serial-killer qui se prend le pied dans le tapis pendant qu'il poursuit sa victime (du plus ridicule au plus effrayant)."}
+
+        ];
+
+        // Fisher-Yates shuffle algorithm to randomize array
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // Shuffle questions on page load/reload
+        const data = shuffle([...rawData]);
+
+        // Distinct high contrast color pairs (Background, Text)
+
+         const colorPalette = [
+            { bg: "#1a1a2e", text: "#ffffff" },
+            { bg: "#e63946", text: "#ffffff" },
+            { bg: "#2a9d8f", text: "#ffffff" },
+            { bg: "#f4a261", text: "#111111" },
+            { bg: "#e76f51", text: "#ffffff" },
+            { bg: "#6d597a", text: "#ffffff" },
+            { bg: "#b5838d", text: "#111111" },
+            { bg: "#003049", text: "#ffffff" },
+            { bg: "#d62828", text: "#ffffff" },
+            { bg: "#f77f00", text: "#111111" },
+            { bg: "#fcbf49", text: "#111111" },
+            { bg: "#eae2b7", text: "#111111" },
+            { bg: "#118ab2", text: "#ffffff" },
+            { bg: "#06d6a0", text: "#111111" },
+            { bg: "#073b4c", text: "#ffffff" },
+            { bg: "#8338ec", text: "#ffffff" },
+            { bg: "#3a86ff", text: "#ffffff" },
+            { bg: "#ff006e", text: "#ffffff" },
+            { bg: "#fb5607", text: "#ffffff" },
+            { bg: "#2b2d42", text: "#ffffff" },
+            { bg: "#8d99ae", text: "#111111" },
+            { bg: "#d90429", text: "#ffffff" },
+            { bg: "#00f5d4", text: "#111111" },
+            { bg: "#7b2cbf", text: "#ffffff" },
+            { bg: "#3c096c", text: "#ffffff" }
+        ];
+
+        let currentIndex = 0;
+
+        const themeEl = document.getElementById('theme');
+        const questionEl = document.getElementById('question');
+        const counterEl = document.getElementById('counter');
+
+        function updateCard(direction = 1) {
+            const current = data[currentIndex];
+            
+            // Pick color from palette based on current index
+            const colorScheme = colorPalette[currentIndex % colorPalette.length];
+
+            // Apply body background and text color
+            document.body.style.backgroundColor = colorScheme.bg;
+            document.body.style.color = colorScheme.text;
+
+            // Content update
+            themeEl.textContent = current.theme;
+            questionEl.textContent = current.question;
+            counterEl.textContent = `${currentIndex + 1} / ${data.length}`;
+
+            // Animation effect
+            questionEl.classList.remove('fade-in');
+            void questionEl.offsetWidth; // trigger reflow
+            questionEl.classList.add('fade-in');
+        }
+
+        function nextQuestion() {
+            currentIndex = (currentIndex + 1) % data.length;
+            updateCard(1);
+        }
+
+        function prevQuestion() {
+            currentIndex = (currentIndex - 1 + data.length) % data.length;
+            updateCard(-1);
+        }
+
+        // Event Listeners for click zones
+        document.getElementById('rightZone').addEventListener('click', nextQuestion);
+        document.getElementById('leftZone').addEventListener('click', prevQuestion);
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextQuestion();
+            } else if (e.key === 'ArrowLeft') {
+                prevQuestion();
+            }
+        });
+
+        // Initialize
+        updateCard();
+    </script>
+</body>
+</html>
